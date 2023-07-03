@@ -7,10 +7,11 @@ public:
 
     [[nodiscard]] int get() const { return m_Value; }
 
-    // Overloading cast operator Int -> int
-    // explicit requires 'static_cast<int>(Int)', while if not marked with explicit,
+    // Overloading cast operator Int -> int:
+    // explicit requires 'static_cast<int>(Int)', but if its not marked with 'explicit',
     // implicit will be used which means:
-    // 'void foo(int a)' makes possible 'foo(Int(0))' - will automatically cast from Int to int
+    // 'foo(Int(0))' is a legit call if foo defined as: 'void foo(int a)'
+    // does automatic (implicit) casting from Int to int
     explicit operator int () const {
         cout << "Int -> int cast operator\n";
         return m_Value;
@@ -36,8 +37,8 @@ int main() {
     foo(static_cast<int>(I));
     foo(static_cast<float>(I));
 
-    // if we didn't mark casting operators with 'explicit',
-    // which of casting functions will be invoked in this case ?
+    // TODO: if we didn't mark casting operators with 'explicit',
+    // TODO: which of casting functions will be invoked in this case ?
     // foo(I);
 
     return 0;
