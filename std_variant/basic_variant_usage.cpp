@@ -47,18 +47,26 @@ void foo(const B& b) {
 }
 
 
+int bar() {
+    throw 42;
+}
+
 
 int main() {
 
     std::variant<A, B> var;
-
     Invoker inv;
-
     auto lambda = [](const auto& obj) {
         obj.print();
     };
-
     std::visit(lambda, var);
+
+
+
+    std::variant<float, int> var2 {10.2f};
+    var2.emplace<int>(10);
+    cout << "holds_alternative = " << std::holds_alternative<int>(var2) << "\n";
+    cout << std::get<1>(var2);
 
     return 0;
 }

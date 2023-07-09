@@ -1,3 +1,4 @@
 
-add_executable(simple_variant basic_variant_usage.cpp)
+add_executable(simple_variant variant_constructors.cpp)
+add_executable(basic_variant basic_variant_usage.cpp)
 add_executable(inheritance_vs_variant inheritance_vs_variant.cpp)
