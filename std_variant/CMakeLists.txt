@@ -1,0 +1,3 @@
+
+add_executable(simple_variant basic_variant_usage.cpp)
+add_executable(inheritance_vs_variant inheritance_vs_variant.cpp)

@@ -16,7 +16,6 @@ int bar(int a, int b) {
 }
 
 // ======================================================================================
-// testing if pointer to this function can be passed into std::function
 void action(int b) {
     cout << "action(" << b << ")\n";
 }
