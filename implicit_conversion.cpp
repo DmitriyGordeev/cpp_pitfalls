@@ -27,7 +27,7 @@ protected:
 };
 
 void foo(int a) {
-    cout << "foo() = " << a << "\n";
+    cout << "print() = " << a << "\n";
 }
 
 int main() {

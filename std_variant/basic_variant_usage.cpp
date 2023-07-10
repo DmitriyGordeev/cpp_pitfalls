@@ -39,11 +39,11 @@ public:
 
 
 void foo(const A& a) {
-    cout << "foo() A\n";
+    cout << "print() A\n";
 }
 
 void foo(const B& b) {
-    cout << "foo() B\n";
+    cout << "print() B\n";
 }
 
 

@@ -1,1 +1,2 @@
-add_executable(move_examples move_examples.cpp)
+add_executable(forwarding forwarding.cpp)
+add_executable(move move.cpp)
