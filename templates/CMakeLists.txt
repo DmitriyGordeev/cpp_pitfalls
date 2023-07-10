@@ -1,2 +1,3 @@
 
 add_executable(basic_templates basic_templates.cpp)
+add_executable(recursive recursive_template.cpp)
