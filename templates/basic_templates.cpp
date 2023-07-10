@@ -37,8 +37,8 @@ void foo(T a) {
 }
 
 template <>
-void foo(const string& s) {
-    cout << s.size() << " : " << s << "\n";
+void foo(const string& a) {
+    cout << a.size() << " : " << a << "\n";
 }
 
 // template specialization for classes:
