@@ -1,0 +1,2 @@
+
+add_executable(basic_templates basic_templates.cpp)

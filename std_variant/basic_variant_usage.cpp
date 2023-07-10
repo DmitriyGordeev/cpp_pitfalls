@@ -47,11 +47,6 @@ void foo(const B& b) {
 }
 
 
-int bar() {
-    throw 42;
-}
-
-
 int main() {
 
     std::variant<A, B> var;
