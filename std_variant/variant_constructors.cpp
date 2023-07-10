@@ -33,13 +33,16 @@ protected:
 
 int main() {
 
-    std::variant<int, A> v{10};
+    std::variant<int, float, double, A> v{10};
     cout << std::holds_alternative<A>(v) << "\n";
 
     // variant uses move constructor if A is r-value
     v.emplace<A>(A());
 
     cout << "before finish\n";
+
+    cout << "sizeof A = " << sizeof(A) << "\n";
+    cout << "sizeof variant = " << sizeof(std::variant<int, float, double, A>) << "\n";
 
     return 0;
 }
