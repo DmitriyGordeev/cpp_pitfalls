@@ -37,7 +37,6 @@ int main() {
     bar(a);     // deduces to int&
     bar(ref);   // deduces to const int&
 
-
     // example 2:
     const char str[7] = "hello!";
     foo(str);   // deduces to 'const char*' (type decay is happening)
@@ -49,9 +48,8 @@ int main() {
     // type decay to 'const char*'
     auto p1 = make_pair_by_value(str1, str2);
 
-    // no type decay: input type deduced as 'const char(&)[7]' instead of 'const char*',
-    // because of pass-by-reference 'T& arg' in function make_pair_by_ref
-    // auto p2 = make_pair_by_ref(str1, str2);
+    // auto p2 = make_pair_by_ref(str1, str2);  no type decay here, because of pass-by-ref 'T& arg' in function
+    // input type deduced as 'const char(&)[7]' instead of 'const char*',
 
     return 0;
 }
