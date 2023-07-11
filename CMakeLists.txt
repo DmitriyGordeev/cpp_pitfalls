@@ -9,6 +9,6 @@ add_subdirectory(templates/)
 
 add_executable(FuncPointers function_pointers.cpp)
 add_executable(Functional stdfunc.cpp)
-add_executable(Functors functors.cpp)
 add_executable(ImplicitConversion implicit_conversion.cpp)
 add_executable(Constcast constcast.cpp)
+add_executable(default_copy_constructor default_copy_constructor.cpp)

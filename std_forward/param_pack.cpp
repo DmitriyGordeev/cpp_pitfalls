@@ -27,6 +27,8 @@ void func(T t, Args... args) {
 
 int main() {
 
+    // variable number of arguments
+
     Object obj;
     func(1.12f, obj);       // copies
     func(1.00f, Object());  // moves

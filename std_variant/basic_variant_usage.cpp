@@ -15,9 +15,9 @@ public:
 };
 
 
-class B {
+class ObjectWithoutCopyConstructor {
 public:
-    B() {
+    ObjectWithoutCopyConstructor() {
         cout << "B constructor\n";
     }
 
@@ -32,7 +32,7 @@ public:
     void operator()(const A& a) {
         a.print();
     }
-    void operator()(const B& b) {
+    void operator()(const ObjectWithoutCopyConstructor& b) {
         b.print();
     }
 };
@@ -42,14 +42,14 @@ void foo(const A& a) {
     cout << "print() A\n";
 }
 
-void foo(const B& b) {
+void foo(const ObjectWithoutCopyConstructor& b) {
     cout << "print() B\n";
 }
 
 
 int main() {
 
-    std::variant<A, B> var;
+    std::variant<A, ObjectWithoutCopyConstructor> var;
     Invoker inv;
     auto lambda = [](const auto& obj) {
         obj.print();
