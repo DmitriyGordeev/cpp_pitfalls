@@ -10,10 +10,10 @@ public:
     Object() {}
 
     void print() const {
-        cout << m_Value << "\n";
+        cout << m_Size << "\n";
     }
 
-    T m_Value;
+    T m_Size;
 };
 
 // ------------------------------

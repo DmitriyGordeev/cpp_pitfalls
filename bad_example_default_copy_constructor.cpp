@@ -7,7 +7,7 @@ using std::endl;
 class ObjectWithoutCopyConstructor {
 public:
     ObjectWithoutCopyConstructor(int value) : m_Value(value) {
-        cout << "B constructor\n";
+        cout << "constructor\n";
         if (m_Value > 0) {
             m_Array = new int[value];
             for (int i = 0; i < value; i++)
@@ -18,7 +18,7 @@ public:
     }
 
     virtual ~ObjectWithoutCopyConstructor() {
-        cout << "B destructor" << endl;
+        cout << "destructor" << endl;
         if (m_Value > 0 && m_Array) {
             delete[] m_Array;
             m_Array = nullptr;
