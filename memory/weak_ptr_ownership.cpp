@@ -46,7 +46,8 @@ public:
 class C {
 public:
     void foo(B& b) {
-        shared_ptr<A> pA(new A(2));
+        shared_ptr<A> pA(new A(1));
+
         b.pA = pA;
 
         b.action1();

@@ -75,11 +75,9 @@ void TEST1_weak_ptr_use_count() {
 
 int main() {
 
-    shared_ptr<A> pA(new A());
-    shared_ptr<B> pB(new B());
+    TEST1_weak_ptr_use_count();
 
-    pA->pB = pB;
-    pB->pA = pA;
+    // TODO: добавить другие интересные случаи
 
     return 0;
 }
