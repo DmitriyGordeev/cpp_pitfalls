@@ -18,7 +18,7 @@ public:
     }
 
     void action() {
-        cout << "action()\n";
+        cout << "performChecks()\n";
         (this->*action_ptr)();
     }
 

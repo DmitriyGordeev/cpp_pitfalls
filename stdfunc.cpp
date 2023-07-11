@@ -17,7 +17,7 @@ int bar(int a, int b) {
 
 // ======================================================================================
 void action(int b) {
-    cout << "action(" << b << ")\n";
+    cout << "performChecks(" << b << ")\n";
 }
 
 class Object {
