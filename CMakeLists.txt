@@ -7,6 +7,7 @@ add_subdirectory(std_variant/)
 add_subdirectory(std_forward/)
 add_subdirectory(templates/)
 add_subdirectory(memory/)
+add_subdirectory(singleton/)
 
 add_executable(FuncPointers function_pointers.cpp)
 add_executable(Functional stdfunc.cpp)

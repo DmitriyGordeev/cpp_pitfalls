@@ -4,6 +4,7 @@ using std::cout;
 class Experiment {
 public:
     explicit Experiment(bool condition) : bCondition(condition) {
+        // we can pick necessary behavior on construct time once
         action_ptr = &Experiment::action_False;
         if (condition)
             action_ptr = &Experiment::action_True;
@@ -18,7 +19,7 @@ public:
     }
 
     void action() {
-        cout << "performChecks()\n";
+        cout << "action()\n";
         (this->*action_ptr)();
     }
 

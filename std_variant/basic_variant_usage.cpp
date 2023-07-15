@@ -1,6 +1,7 @@
 #include <iostream>
 #include <variant>
 using std::cout;
+using std::string;
 
 
 class A {
@@ -47,6 +48,17 @@ void foo(const ObjectWithoutCopyConstructor& b) {
 }
 
 
+std::variant<string, bool> getStringIfAvailable(bool available) {
+    std::variant<string, bool> result;
+    if (available)
+        result.emplace<string>("name");
+    else
+        result.emplace<bool>(false);
+
+    return result;
+}
+
+
 int main() {
 
     std::variant<A, ObjectWithoutCopyConstructor> var;
@@ -62,6 +74,10 @@ int main() {
     var2.emplace<int>(10);
     cout << "holds_alternative = " << std::holds_alternative<int>(var2) << "\n";
     cout << std::get<1>(var2);
+
+
+    auto r_true = getStringIfAvailable(true);
+    auto r_false = getStringIfAvailable(false);
 
     return 0;
 }

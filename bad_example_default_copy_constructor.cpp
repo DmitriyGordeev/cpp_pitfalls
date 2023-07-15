@@ -39,7 +39,7 @@ int main() {
     // destroying b1 - invalidates memory
     b1.~ObjectWithoutCopyConstructor();
 
-    // b2 points to bad memory and causing error
+    // b2 points to bad memory and causes error
     cout << b2.m_Array[0];
 
     return 0;
