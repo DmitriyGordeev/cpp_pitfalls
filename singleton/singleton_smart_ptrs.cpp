@@ -9,6 +9,11 @@ using std::weak_ptr;
 
 class Singleton {
 public:
+
+    // TODO: используем weak_ptr, потому что нам не нужен ownership объекта,
+    //  мы просто хотим получить доступ к нему, если он есть памяти.
+    //  Подумать, есть ли тут какие-то серьезные проблемы и
+    //  добавить другие интересные случаи - например thread safe
     static weak_ptr<Singleton> get(int value) {
         if (!m_Ptr) {
             shared_ptr<Singleton> p(new Singleton(value));
@@ -17,6 +22,12 @@ public:
 
         return m_Ptr;
     }
+
+    void setValue(int value) {
+        m_Value = value;
+    }
+
+    int getValue() const { return m_Value; }
 
     virtual ~Singleton() {
         cout << "destructor" << endl;
@@ -32,14 +43,14 @@ protected:
     int m_Value;
 };
 
-// TODO: test inheritance of Singleton
-// TODO: test thread safety
-
 shared_ptr<Singleton> Singleton::m_Ptr = nullptr;
 
 
 void foo() {
     auto p1 =  Singleton::get(10);
+
+    p1.lock()->setValue(20);
+
     cout << "foo(): singleton address = " << p1.lock().get() << endl;
 }
 
@@ -50,8 +61,11 @@ int main() {
     foo();
 
     auto p = Singleton::get(10);
-
-    cout << p.lock().get() << endl;
+    if (!p.expired()) {
+        auto ps = p.lock();
+        cout << "main(): Singleton address: " << ps.get() << endl;
+        cout << "Singleton value = " << ps->getValue() << endl;
+    }
 
     return 0;
 }

@@ -1,2 +1,2 @@
-add_executable(singleton singleton.cpp)
+add_executable(singleton bad_singleton.cpp)
 add_executable(singleton_ptr singleton_smart_ptrs.cpp)
