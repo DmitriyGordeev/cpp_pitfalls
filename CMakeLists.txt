@@ -9,6 +9,7 @@ add_subdirectory(templates/)
 add_subdirectory(memory/)
 add_subdirectory(singleton/)
 add_subdirectory(async/)
+add_subdirectory(threads/)
 
 add_executable(FuncPointers function_pointers.cpp)
 add_executable(Functional stdfunc.cpp)
