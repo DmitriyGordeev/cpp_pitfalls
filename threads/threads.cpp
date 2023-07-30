@@ -79,6 +79,11 @@ public:
         cout << "GameThread::start garbage collecting the actor" << endl;
         iomutex.unlock();
 
+        // начинаем удалять Actor, притворяясь как-будто это занимает некоторое время
+        // и строка m_actor = nullptr выполняется не сразу,
+        // во время этого RenderingThread может читать Actor или записывать, что приведет к ошибке
+        // или невалидным значениям, так как m_actor = nullptr еще не выполнилась,
+        // а значит проверка if(m_actor) будет бесполезна
         delete m_actor;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
