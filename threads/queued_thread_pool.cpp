@@ -7,6 +7,7 @@
 #include <deque>
 #include <mutex>
 #include <chrono>
+#include <variant>
 
 using std::cout;
 using std::endl;
@@ -20,12 +21,16 @@ enum EThreadStatus {
 };
 
 struct ThreadItem {
-    ThreadItem(const std::function<void()>& threadLambda, EThreadStatus status) : m_status(status) {
-        m_worker = std::thread(threadLambda);
+    ThreadItem(const std::function<void(int)>& threadLambda, EThreadStatus status, int index)
+        : m_status(status), m_index(index) {
+        m_worker = std::thread(threadLambda, index);
     }
-    std::thread m_worker;
     EThreadStatus m_status {PENDING};
+    size_t m_index;
+    std::thread m_worker;
 };
+
+
 
 
 template <class Out, class ...Args>
@@ -60,23 +65,30 @@ public:
         if (m_threads.size() < m_size) {
             int index = m_threads.size();
 
-            m_threads.emplace_back([&, index=index, functor = functor]() {
+            m_threads.emplace_back([&, functor = functor](int index) {
                 run(index, functor, std::forward<Args...>(args...));
-            }, PENDING);
+            }, PENDING, index);
 
         }
         else {
+
             for (int i = 0; i < m_threads.size(); i++) {
                 // once we found finished thread we create another one and finish the loop
                 if (m_threads[i].m_status == FINISHED) {
                     m_threads[i].m_worker.join();
 
-                    m_threads.emplace_back([&, i=i, functor = functor]() {
+                    m_threads.emplace_back([&, functor = functor](int index) {
                         run(i, functor, std::forward<Args...>(args...));
-                    }, PENDING);
-                    break;
+                    }, PENDING, i);
+                    return;
                 }
             }
+
+            // if no process was marked as FINISHED, we stash action into queue
+            // saving as a lambda to pass it later to thread
+            m_taskQueue.emplace_back([&, functor = functor](int index) {
+                run(index, functor, std::forward<Args...>(args...));
+            }, PENDING, -1);
         }
 
 
@@ -85,7 +97,9 @@ public:
 protected:
     size_t m_size {0};
     std::vector<ThreadItem> m_threads;
-//    std::deque<std::function<Out(Args... args)>, Args...> m_taskQueue;
+//    std::deque<std::function<Out(Args...)>> m_taskQueue;
+
+    std::deque<ThreadItem> m_taskQueue;
 };
 
 
@@ -94,13 +108,10 @@ int foo(int a) {
     return a + 2;
 }
 
-
 int main() {
 
     QueuedThreadPool<int, int> queuedThreadPool(3);
     queuedThreadPool.consume(foo, 1);
-
-
 
     return 0;
 }

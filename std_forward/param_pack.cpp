@@ -25,6 +25,18 @@ void func(T t, Args... args) {
     func(std::forward<Args>(args)...);
 }
 
+// Unpacking variadic params
+template <typename ...Args>
+void bar(Args... args) {
+    int index = 0;
+    ([&]{
+        cout << "param index[" << index << "] : " << args << endl;
+        index++;
+    } (), ...);
+}
+
+
+
 int main() {
 
     // variable number of arguments
@@ -32,6 +44,9 @@ int main() {
     Object obj;
     func(1.12f, obj);       // copies
     func(1.00f, Object());  // moves
+
+
+    bar(1, 3, -2.1f);
 
     return 0;
 }
