@@ -1,6 +1,5 @@
-/**
- * Mini thread pool example
- */
+/** Basic thread pool example with predefined number of workers consuming vector's elements
+ * and does some simple calculations */
 
 #include <iostream>
 #include <thread>
@@ -14,12 +13,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
-/** Basic thread pool example with predefined number of workers consuming vector's elements
- * and does some simple calculations */
-
-
 std::mutex mut;
-
 
 class ThreadPool {
 public:
