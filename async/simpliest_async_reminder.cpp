@@ -3,6 +3,7 @@
 #include <chrono>
 
 // TODO: сделать флаг на Linux/Windows:
+#include <windows.h>
 #include <processthreadsapi.h>
 
 using std::cout;
