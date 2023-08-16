@@ -14,6 +14,8 @@ using std::endl;
 using std::string;
 using std::vector;
 
+std::mutex mut;
+
 enum EThreadStatus {
     PENDING,
     RUNNING,
@@ -21,13 +23,8 @@ enum EThreadStatus {
 };
 
 struct ThreadItem {
-//    ThreadItem(const std::function<void(int)>& threadLambda, EThreadStatus status, int index)
-//        : m_status(status), m_index(index) {
-//        m_worker = std::thread(threadLambda, index);
-//    }
-
-    ThreadItem(const std::function<void(int)>& threadLambda, EThreadStatus status, int index)
-        : m_status(status), m_index(index), m_process(threadLambda) {
+    ThreadItem(std::function<void(size_t)> threadLambda, EThreadStatus status, size_t index)
+            : m_status(status), m_index(index), m_process(std::move(threadLambda)) {
     }
 
     void run() {
@@ -37,7 +34,7 @@ struct ThreadItem {
     EThreadStatus m_status {PENDING};
     size_t m_index;
     std::thread m_worker;
-    std::function<void(int)> m_process;
+    std::function<void(size_t)> m_process;
 };
 
 
@@ -110,24 +107,25 @@ public:
 
     void consume(std::function<Out(Args... args)> functor, Args... args) {
         if (m_threads.size() < m_size) {
-            int index = m_threads.size();
+            size_t index = m_threads.size();
 
-            auto& inserted_element = m_threads.emplace_back([&, functor = functor](int index) {
-                run(index, functor, std::forward<Args...>(args...));
+            auto& inserted_element = m_threads.emplace_back([=, this, functor = functor](size_t index) {
+                run(index, functor, args...);
             }, PENDING, index);
 
             inserted_element.run();
             return;
         }
 
+
         // todo: extract tasks from queue if there are any
-        for (int i = 0; i < m_threads.size(); i++) {
+        for (size_t i = 0; i < m_threads.size(); i++) {
             // once we found finished thread we create another one and finish the loop
             if (m_threads[i].m_status == FINISHED) {
                 m_threads[i].m_worker.join();
 
-                auto& inserted_element = m_threads.emplace_back([&, functor = functor](int index) {
-                    run(i, functor, std::forward<Args...>(args...));
+                auto& inserted_element = m_threads.emplace_back([=, this, functor = functor](size_t index) {
+                    run(i, functor, args...);
                 }, PENDING, i);
 
                 inserted_element.run();
@@ -137,8 +135,8 @@ public:
 
         // if no process was marked as FINISHED, we stash action into queue
         // saving as a lambda to pass it later to thread
-        m_taskQueue.emplace_back([&, functor = functor](int index) {
-            run(index, functor, std::forward<Args...>(args...));
+        m_taskQueue.emplace_back([=, this, functor = functor](size_t index) {
+            run(index, functor, args...);
         }, PENDING, -1);
 
 
@@ -157,9 +155,10 @@ public:
         }
     }
 
+    std::vector<ThreadItem> m_threads;
+
 protected:
     size_t m_size {0};
-    std::vector<ThreadItem> m_threads;
     std::deque<ThreadItem> m_taskQueue;
     std::thread* m_schedulerThread {nullptr};
     bool m_schedulerRunning {false};
@@ -168,17 +167,16 @@ protected:
 
 int foo(int a) {
     cout << "foo(" << a << ")\n";
-    return a + 2;
+    a *= 2;
+    return a;
 }
 
 int main() {
 
-    // todo: пофиксить отдачу одинаковых аргументов
     QueuedThreadPool<int, int> queuedThreadPool(3);
     queuedThreadPool.consume(foo, 1);
-    queuedThreadPool.consume(foo, 2);
     queuedThreadPool.consume(foo, 3);
-    queuedThreadPool.consume(foo, 4);
+    queuedThreadPool.consume(foo, 19);
 
     return 0;
 }
