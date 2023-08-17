@@ -4,7 +4,7 @@
 
 // TODO: сделать флаг на Linux/Windows:
 #include <windows.h>
-#include <processthreadsapi.h>
+#include <processthreadsapi.h>     // GetCurrentThreadId()
 
 using std::cout;
 using std::endl;

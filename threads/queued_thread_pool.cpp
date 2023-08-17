@@ -27,6 +27,21 @@ struct ThreadItem {
             : m_status(status), m_index(index), m_process(std::move(threadLambda)) {
     }
 
+    ThreadItem(ThreadItem&& another) noexcept {
+        m_status = another.m_status;
+        m_index = another.m_index;
+        m_worker = std::move(another.m_worker);
+        m_process = another.m_process;
+    }
+
+    ThreadItem& operator = (ThreadItem&& another)  noexcept {
+        m_status = another.m_status;
+        m_index = another.m_index;
+        m_worker = std::move(another.m_worker);
+        m_process = another.m_process;
+        return *this;
+    }
+
     void run() {
         m_worker = std::thread(m_process, m_index);
     }
@@ -46,16 +61,15 @@ public:
     explicit QueuedThreadPool(size_t size) : m_size(size) {}
 
     virtual ~QueuedThreadPool() {
-        join();
+        join_all();
     }
 
-    void join() {
+    void join_all() {
+        cleanupScheduler();
         for(auto & threadItem : m_threads) {
             if (threadItem.m_worker.joinable())
                 threadItem.m_worker.join();
         }
-
-        cleanupScheduler();
     }
 
     void scheduleQueue() {
@@ -74,6 +88,8 @@ public:
                 }
 
                 if (m_threads[i].m_status == FINISHED) {
+                    if (!m_threads[i].m_worker.joinable())
+                        continue;
                     m_threads[i].m_worker.join();
 
                     // moving ownership from queue to vector of tasks and deleting empty entry in queue
@@ -88,20 +104,19 @@ public:
                 }
 
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(m_schedulerUpdateFreqMs));
         }
 
         m_schedulerRunning = false;
     }
 
     void run(size_t index, std::function<Out(Args... args)> functor, Args... args) {
-        // todo: mutex
         m_threads[index].m_status = RUNNING;
 
         Out result = functor(std::forward<Args...>(args...));
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         cout << "result = " << result << " | thread id = " << std::this_thread::get_id() << endl;
 
-        // todo: подумать про data-race
         m_threads[index].m_status = FINISHED;
     }
 
@@ -118,28 +133,38 @@ public:
         }
 
 
-        // todo: extract tasks from queue if there are any
+        // if some of the workers already finished we can reassign a task
         for (size_t i = 0; i < m_threads.size(); i++) {
             // once we found finished thread we create another one and finish the loop
             if (m_threads[i].m_status == FINISHED) {
+                if (!m_threads[i].m_worker.joinable())
+                    continue;
+
+                // lock to prevent other threads schedule at the same index
+                // (in case .consume() is called from other threads)
+                m_mutex.lock();
                 m_threads[i].m_worker.join();
-
-                auto& inserted_element = m_threads.emplace_back([=, this, functor = functor](size_t index) {
-                    run(i, functor, args...);
-                }, PENDING, i);
-
-                inserted_element.run();
+                m_threads[i] = std::move(
+                        ThreadItem(
+                                [=, this, functor = functor](size_t index) {
+                                    run(i, functor, args...);
+                                },
+                                PENDING,
+                                i)
+                );
+                m_threads[i].run();
+                m_mutex.unlock();
                 return;
             }
         }
 
         // if no process was marked as FINISHED, we stash action into queue
-        // saving as a lambda to pass it later to thread
         m_taskQueue.emplace_back([=, this, functor = functor](size_t index) {
             run(index, functor, args...);
         }, PENDING, -1);
 
 
+        // Start scheduler to schedule queued task when any of the running tasks was finished
         if (!m_schedulerRunning) {
             cleanupScheduler();
             m_schedulerThread = new std::thread(&QueuedThreadPool::scheduleQueue, this);
@@ -155,28 +180,34 @@ public:
         }
     }
 
-    std::vector<ThreadItem> m_threads;
+    void setSchedulerUpdateFreqMs(int ms) {
+        m_schedulerUpdateFreqMs = ms < 0 ? 0 : ms;
+        m_schedulerUpdateFreqMs = ms > 10000 ? 10000 : ms;
+    }
+
 
 protected:
     size_t m_size {0};
+    std::vector<ThreadItem> m_threads;
     std::deque<ThreadItem> m_taskQueue;
     std::thread* m_schedulerThread {nullptr};
     bool m_schedulerRunning {false};
+    int m_schedulerUpdateFreqMs {250};
+    std::mutex m_mutex;
 };
 
 
 int foo(int a) {
     cout << "foo(" << a << ")\n";
-    a *= 2;
-    return a;
+    return a * 2;
 }
 
 int main() {
 
-    QueuedThreadPool<int, int> queuedThreadPool(3);
-    queuedThreadPool.consume(foo, 1);
-    queuedThreadPool.consume(foo, 3);
-    queuedThreadPool.consume(foo, 19);
+    // Create a thread pool with max 3 workers
+    QueuedThreadPool<int, int> queuedThreadPool(5);
+    for (int i = 0; i < 10; i++)
+        queuedThreadPool.consume(foo, i);
 
     return 0;
 }
