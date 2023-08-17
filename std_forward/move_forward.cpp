@@ -35,8 +35,8 @@ public:
     }
 
 protected:
-    int* m_data {nullptr};
     size_t m_size {0};
+    int* m_data {nullptr};
 };
 
 

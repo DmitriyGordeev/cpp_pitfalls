@@ -4,8 +4,8 @@ using std::cout;
 using std::endl;
 
 using std::shared_ptr;
-using std::unique_ptr;
-using std::weak_ptr;
+//using std::unique_ptr;
+//using std::weak_ptr;
 
 class Object {
 public:
