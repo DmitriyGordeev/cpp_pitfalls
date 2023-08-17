@@ -55,8 +55,6 @@ struct ThreadItem {
 
 
 
-
-//template <class Out, class ...Args>
 class QueuedThreadPool {
 public:
     explicit QueuedThreadPool(size_t size) : m_size(size) {}
@@ -73,6 +71,9 @@ public:
         }
     }
 
+    /** Runs in a separate thread to check whether any task finished to schedule a new one
+     * we previously stashed into queue (if any). Loops with specified frequency time
+     * */
     void scheduleQueue() {
         m_schedulerRunning = true;
         if (m_taskQueue.empty()) {
@@ -111,6 +112,10 @@ public:
         m_schedulerRunning = false;
     }
 
+
+    /** Runs a worker with specified template arguments (functor) and out value
+     * */
+    // todo: надо подумать куда записывать результаты, сейчас просто принтятся
     template <class Out, class ...Args>
     void run(size_t index, std::function<Out(Args... args)> functor, Args... args) {
         m_threads[index].m_status = RUNNING;
@@ -122,6 +127,10 @@ public:
         m_threads[index].m_status = FINISHED;
     }
 
+
+    /** Adds a task to worker and either runs it (if any free worker persists)
+     * or stashes into queue to retrieve and
+     * run later when any worker finished its previous task */
     template <class Out, class ...Args>
     void consume(std::function<Out(Args... args)> functor, Args... args) {
         if (m_threads.size() < m_size) {
@@ -144,7 +153,7 @@ public:
                     continue;
 
                 // lock to prevent other threads schedule at the same index
-                // (in case .consume() is called from other threads)
+                // (in case .consume() is called from different threads)
                 m_mutex.lock();
                 m_threads[i].m_worker.join();
                 m_threads[i] = std::move(
@@ -183,6 +192,7 @@ public:
         }
     }
 
+    /** Changes scheduler's frequency for polling workers - if any finished or still running */
     void setSchedulerUpdateFreqMs(int ms) {
         m_schedulerUpdateFreqMs = ms < 0 ? 0 : ms;
         m_schedulerUpdateFreqMs = ms > 10000 ? 10000 : ms;
@@ -212,7 +222,8 @@ float bar(float a, float c) {
 
 int main() {
 
-    // Create a thread pool with max 3 workers
+    // Create a thread pool with max 3 workers and schedule 10 different tasks
+    // which will be processed by batches of 3
     QueuedThreadPool queuedThreadPool(5);
     for (int i = 0; i < 10; i++) {
         queuedThreadPool.consume<int, int>(foo, i);
