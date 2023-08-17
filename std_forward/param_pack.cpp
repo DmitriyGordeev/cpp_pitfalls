@@ -36,7 +36,6 @@ void bar(Args... args) {
 }
 
 
-
 int main() {
 
     // variable number of arguments
@@ -45,8 +44,8 @@ int main() {
     func(1.12f, obj);       // copies
     func(1.00f, Object());  // moves
 
-
     bar(1, 3, -2.1f);
+
 
     return 0;
 }

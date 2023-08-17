@@ -1,4 +1,5 @@
-// TODO: добавить коменты
+// Simple thread pool with consume() method scheduling a template-specified
+// functor in a separate thread. Destructor joins all scheduler thread
 
 #include <iostream>
 #include <thread>
@@ -55,7 +56,7 @@ struct ThreadItem {
 
 
 
-template <class Out, class ...Args>
+//template <class Out, class ...Args>
 class QueuedThreadPool {
 public:
     explicit QueuedThreadPool(size_t size) : m_size(size) {}
@@ -110,16 +111,18 @@ public:
         m_schedulerRunning = false;
     }
 
+    template <class Out, class ...Args>
     void run(size_t index, std::function<Out(Args... args)> functor, Args... args) {
         m_threads[index].m_status = RUNNING;
 
-        Out result = functor(std::forward<Args...>(args...));
+        Out result = functor(std::forward<Args>(args)...);
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         cout << "result = " << result << " | thread id = " << std::this_thread::get_id() << endl;
 
         m_threads[index].m_status = FINISHED;
     }
 
+    template <class Out, class ...Args>
     void consume(std::function<Out(Args... args)> functor, Args... args) {
         if (m_threads.size() < m_size) {
             size_t index = m_threads.size();
@@ -202,12 +205,19 @@ int foo(int a) {
     return a * 2;
 }
 
+float bar(float a, float c) {
+    cout << "bar(" << a << ", " << c << ")\n";
+    return a / c;
+}
+
 int main() {
 
     // Create a thread pool with max 3 workers
-    QueuedThreadPool<int, int> queuedThreadPool(5);
-    for (int i = 0; i < 10; i++)
-        queuedThreadPool.consume(foo, i);
+    QueuedThreadPool queuedThreadPool(5);
+    for (int i = 0; i < 10; i++) {
+        queuedThreadPool.consume<int, int>(foo, i);
+        queuedThreadPool.consume<float, float, float>(bar, (i + 1) * 1.1f, (i + 1) * 0.8f);
+    }
 
     return 0;
 }
