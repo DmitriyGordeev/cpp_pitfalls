@@ -22,8 +22,6 @@ int foo() {
 
 int main() {
 
-    // TODO: сделать пример с вложенными callback, как в js Promise->then->then ...
-
     std::future<int> f = std::async(std::launch::async, foo);
 
     // TODO: есть ли более простой способ ждать future ?

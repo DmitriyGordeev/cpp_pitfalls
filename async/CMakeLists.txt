@@ -1,1 +1,2 @@
 add_executable(SimpliestAsync simpliest_async_reminder.cpp)
+add_executable(promise_then promise_then.cpp)
