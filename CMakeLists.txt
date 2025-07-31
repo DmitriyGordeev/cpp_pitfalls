@@ -11,6 +11,7 @@ add_subdirectory(singleton/)
 add_subdirectory(async/)
 add_subdirectory(threads/)
 add_subdirectory(coroutines/)
+add_subdirectory(dll)
 
 add_executable(FuncPointers function_pointers.cpp)
 add_executable(Functional stdfunc.cpp)
