@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.29)
+project(cpp_examples)
+
+add_executable(coroutine_1 coroutine_1.cpp)
+add_executable(coroutine_2 coroutine_2.cpp)
+add_executable(coroutine_3 coroutine_3.cpp)
+add_executable(coroutine_4 coroutine_3.cpp)
+add_executable(coroutine_4_return_void_example coroutine_4_return_void_example.cpp)
+add_executable(coroutine_5_co_return_example coroutine_5_co_return_example.cpp)
+add_executable(coroutine_6_timer_resume_example coroutine_6_timer_resume_example.cpp)

@@ -7,7 +7,6 @@
 #include <vector>
 #include <deque>
 #include <mutex>
-#include <chrono>
 #include <variant>
 
 using std::cout;
@@ -222,12 +221,15 @@ float bar(float a, float c) {
 
 int main() {
 
+    std::function<int(int)> f_foo(foo);
+    std::function<float(float, float)> f_bar(bar);
+
     // Create a thread pool with max 3 workers and schedule 10 different tasks
-    // which will be processed by batches of 3
-    QueuedThreadPool queuedThreadPool(5);
+    // which will be processed by batches
+    QueuedThreadPool queued_thread_pool(5);
     for (int i = 0; i < 10; i++) {
-        queuedThreadPool.consume<int, int>(foo, i);
-        queuedThreadPool.consume<float, float, float>(bar, (i + 1) * 1.1f, (i + 1) * 0.8f);
+        queued_thread_pool.consume<int, int>(f_foo, i);
+        queued_thread_pool.consume<float, float, float>(f_bar, 0.1f, 0.2f);
     }
 
     return 0;
